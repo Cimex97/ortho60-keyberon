@@ -3,7 +3,7 @@
 
 use core::convert::Infallible;
 use embedded_hal::digital::v2::{InputPin, OutputPin};
-use generic_array::typenum::{U12, U5};
+use generic_array::typenum::{U7, U10};
 use keyberon::debounce::Debouncer;
 use keyberon::impl_heterogenous_array;
 use keyberon::key_code::{KbHidReport, KeyCode};
@@ -37,38 +37,38 @@ impl keyberon::keyboard::Leds for Leds {
 }
 
 pub struct Cols(
-    pub PB11<Input<PullUp>>,
-    pub PB10<Input<PullUp>>,
-    pub PB1<Input<PullUp>>,
-    pub PB0<Input<PullUp>>,
-    pub PA7<Input<PullUp>>,
-    pub PA6<Input<PullUp>>,
-    pub PA5<Input<PullUp>>,
-    pub PA4<Input<PullUp>>,
-    pub PA3<Input<PullUp>>,
-    pub PA2<Input<PullUp>>,
-    pub PA1<Input<PullUp>>,
     pub PA0<Input<PullUp>>,
+    pub PA1<Input<PullUp>>,
+    pub PA2<Input<PullUp>>,
+    pub PA3<Input<PullUp>>,
+    pub PA4<Input<PullUp>>,
+    pub PA5<Input<PullUp>>,
+    pub PA6<Input<PullUp>>,
 );
 impl_heterogenous_array! {
     Cols,
     dyn InputPin<Error = Infallible>,
-    U12,
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    U7,
+    [0, 1, 2, 3, 4, 5, 6]
 }
 
 pub struct Rows(
+    pub PA9<Output<PushPull>>,
+    pub PA10<Output<PushPull>>,
+    pub PA15<Output<PushPull>>,
     pub PB3<Output<PushPull>>,
     pub PB4<Output<PushPull>>,
     pub PB5<Output<PushPull>>,
     pub PB6<Output<PushPull>>,
     pub PB7<Output<PushPull>>,
+    pub PB8<Output<PushPull>>,
+    pub PB9<Output<PushPull>>,
 );
 impl_heterogenous_array! {
     Rows,
     dyn OutputPin<Error = Infallible>,
-    U5,
-    [0, 1, 2, 3, 4]
+    U10,
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 }
 
 #[app(device = stm32f1xx_hal::pac, peripherals = true)]
@@ -77,7 +77,7 @@ const APP: () = {
         usb_dev: UsbDevice,
         usb_class: UsbClass,
         matrix: Matrix<Cols, Rows>,
-        debouncer: Debouncer<PressedKeys<U5, U12>>,
+        debouncer: Debouncer<PressedKeys<U10, U7>>,
         layout: Layout,
         timer: timer::CountDownTimer<pac::TIM3>,
     }
@@ -136,29 +136,29 @@ const APP: () = {
             timer::Timer::tim3(c.device.TIM3, &clocks, &mut rcc.apb1).start_count_down(1.khz());
         timer.listen(timer::Event::Update);
 
-        let (_pa15, pb3, pb4) = afio.mapr.disable_jtag(gpioa.pa15, gpiob.pb3, gpiob.pb4);
+        let (pa15, pb3, pb4) = afio.mapr.disable_jtag(gpioa.pa15, gpiob.pb3, gpiob.pb4);
 
         let matrix = Matrix::new(
             Cols(
-                gpiob.pb11.into_pull_up_input(&mut gpiob.crh),
-                gpiob.pb10.into_pull_up_input(&mut gpiob.crh),
-                gpiob.pb1.into_pull_up_input(&mut gpiob.crl),
-                gpiob.pb0.into_pull_up_input(&mut gpiob.crl),
-                gpioa.pa7.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa6.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa5.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa4.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa3.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa2.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa1.into_pull_up_input(&mut gpioa.crl),
                 gpioa.pa0.into_pull_up_input(&mut gpioa.crl),
+                gpioa.pa1.into_pull_up_input(&mut gpioa.crl),
+                gpioa.pa2.into_pull_up_input(&mut gpioa.crl),
+                gpioa.pa3.into_pull_up_input(&mut gpioa.crl),
+                gpioa.pa4.into_pull_up_input(&mut gpioa.crl),
+                gpioa.pa5.into_pull_up_input(&mut gpioa.crl),
+                gpioa.pa6.into_pull_up_input(&mut gpioa.crl),
             ),
             Rows(
+                gpioa.pa9.into_push_pull_output(&mut gpioa.crh),
+                gpioa.pa10.into_push_pull_output(&mut gpioa.crh),
+                pa15.into_push_pull_output(&mut gpioa.crh),
                 pb3.into_push_pull_output(&mut gpiob.crl),
                 pb4.into_push_pull_output(&mut gpiob.crl),
                 gpiob.pb5.into_push_pull_output(&mut gpiob.crl),
                 gpiob.pb6.into_push_pull_output(&mut gpiob.crl),
                 gpiob.pb7.into_push_pull_output(&mut gpiob.crl),
+                gpiob.pb8.into_push_pull_output(&mut gpiob.crh),
+                gpiob.pb9.into_push_pull_output(&mut gpiob.crh),
             ),
         );
 
