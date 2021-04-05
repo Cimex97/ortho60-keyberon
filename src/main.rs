@@ -11,7 +11,7 @@ use keyberon::layout::Layout;
 use keyberon::matrix::{Matrix, PressedKeys};
 use panic_semihosting as _;
 use rtic::app;
-use stm32f1xx_hal::gpio::{gpioa::*, gpiob::*, Input, Output, PullUp, PushPull};
+use stm32f1xx_hal::gpio::{gpioa::*, gpiob::*, Input, Output, PullDown, PushPull};
 use stm32f1xx_hal::prelude::*;
 use stm32f1xx_hal::usb::{Peripheral, UsbBus, UsbBusType};
 use stm32f1xx_hal::{gpio, pac, timer};
@@ -36,37 +36,37 @@ impl keyberon::keyboard::Leds for Leds {
     }
 }
 
-pub struct Cols(
-    pub PA0<Input<PullUp>>,
-    pub PA1<Input<PullUp>>,
-    pub PA2<Input<PullUp>>,
-    pub PA3<Input<PullUp>>,
-    pub PA4<Input<PullUp>>,
-    pub PA5<Input<PullUp>>,
-    pub PA6<Input<PullUp>>,
+pub struct ColsOutput(
+    pub PA0<Output<PushPull>>,
+    pub PA1<Output<PushPull>>,
+    pub PA2<Output<PushPull>>,
+    pub PA3<Output<PushPull>>,
+    pub PA4<Output<PushPull>>,
+    pub PA5<Output<PushPull>>,
+    pub PA6<Output<PushPull>>,
 );
 impl_heterogenous_array! {
-    Cols,
-    dyn InputPin<Error = Infallible>,
+    ColsOutput,
+    dyn OutputPin<Error = Infallible>,
     U7,
     [0, 1, 2, 3, 4, 5, 6]
 }
 
-pub struct Rows(
-    pub PA9<Output<PushPull>>, // 1
-    pub PB5<Output<PushPull>>, // 6
-    pub PA10<Output<PushPull>>, // 2
-    pub PB6<Output<PushPull>>, // 7
-    pub PA15<Output<PushPull>>, // 3
-    pub PB7<Output<PushPull>>, // 8
-    pub PB3<Output<PushPull>>, // 4
-    pub PB8<Output<PushPull>>, // 9
-    pub PB4<Output<PushPull>>, // 5
-    pub PB9<Output<PushPull>>, // 10
+pub struct RowsInput(
+    pub PA9<Input<PullDown>>, // 1
+    pub PB5<Input<PullDown>>, // 6
+    pub PA10<Input<PullDown>>, // 2
+    pub PB6<Input<PullDown>>, // 7
+    pub PA15<Input<PullDown>>, // 3
+    pub PB7<Input<PullDown>>, // 8
+    pub PB3<Input<PullDown>>, // 4
+    pub PB8<Input<PullDown>>, // 9
+    pub PB4<Input<PullDown>>, // 5
+    pub PB9<Input<PullDown>>, // 10
 );
 impl_heterogenous_array! {
-    Rows,
-    dyn OutputPin<Error = Infallible>,
+    RowsInput,
+    dyn InputPin<Error = Infallible>,
     U10,
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 }
@@ -76,8 +76,8 @@ const APP: () = {
     struct Resources {
         usb_dev: UsbDevice,
         usb_class: UsbClass,
-        matrix: Matrix<Cols, Rows>,
-        debouncer: Debouncer<PressedKeys<U10, U7>>,
+        matrix: Matrix<RowsInput, ColsOutput>,
+        debouncer: Debouncer<PressedKeys<U7, U10>>,
         layout: Layout,
         timer: timer::CountDownTimer<pac::TIM3>,
     }
@@ -139,26 +139,26 @@ const APP: () = {
         let (pa15, pb3, pb4) = afio.mapr.disable_jtag(gpioa.pa15, gpiob.pb3, gpiob.pb4);
 
         let matrix = Matrix::new(
-            Cols(
-                gpioa.pa0.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa1.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa2.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa3.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa4.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa5.into_pull_up_input(&mut gpioa.crl),
-                gpioa.pa6.into_pull_up_input(&mut gpioa.crl),
+            RowsInput(
+                gpioa.pa9.into_pull_down_input(&mut gpioa.crh),
+                gpiob.pb5.into_pull_down_input(&mut gpiob.crl),
+                gpioa.pa10.into_pull_down_input(&mut gpioa.crh),
+                gpiob.pb6.into_pull_down_input(&mut gpiob.crl),
+                pa15.into_pull_down_input(&mut gpioa.crh),
+                gpiob.pb7.into_pull_down_input(&mut gpiob.crl),
+                pb3.into_pull_down_input(&mut gpiob.crl),
+                gpiob.pb8.into_pull_down_input(&mut gpiob.crh),
+                pb4.into_pull_down_input(&mut gpiob.crl),
+                gpiob.pb9.into_pull_down_input(&mut gpiob.crh),
             ),
-            Rows(
-                gpioa.pa9.into_push_pull_output(&mut gpioa.crh),
-                gpiob.pb5.into_push_pull_output(&mut gpiob.crl),
-                gpioa.pa10.into_push_pull_output(&mut gpioa.crh),
-                gpiob.pb6.into_push_pull_output(&mut gpiob.crl),
-                pa15.into_push_pull_output(&mut gpioa.crh),
-                gpiob.pb7.into_push_pull_output(&mut gpiob.crl),
-                pb3.into_push_pull_output(&mut gpiob.crl),
-                gpiob.pb8.into_push_pull_output(&mut gpiob.crh),
-                pb4.into_push_pull_output(&mut gpiob.crl),
-                gpiob.pb9.into_push_pull_output(&mut gpiob.crh),
+            ColsOutput(
+                gpioa.pa0.into_push_pull_output(&mut gpioa.crl),
+                gpioa.pa1.into_push_pull_output(&mut gpioa.crl),
+                gpioa.pa2.into_push_pull_output(&mut gpioa.crl),
+                gpioa.pa3.into_push_pull_output(&mut gpioa.crl),
+                gpioa.pa4.into_push_pull_output(&mut gpioa.crl),
+                gpioa.pa5.into_push_pull_output(&mut gpioa.crl),
+                gpioa.pa6.into_push_pull_output(&mut gpioa.crl),
             ),
         );
 
@@ -190,6 +190,8 @@ const APP: () = {
             .resources
             .debouncer
             .events(c.resources.matrix.get().unwrap())
+            .map(|e| e.transform(|i,j| (j,i) ))
+
         {
             send_report(c.resources.layout.event(event), &mut c.resources.usb_class);
         }
