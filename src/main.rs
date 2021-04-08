@@ -54,14 +54,14 @@ impl_heterogenous_array! {
 
 pub struct Rows(
     pub PA9<Output<PushPull>>, // 1
-    pub PB5<Output<PushPull>>, // 6
     pub PA10<Output<PushPull>>, // 2
-    pub PB6<Output<PushPull>>, // 7
     pub PA15<Output<PushPull>>, // 3
-    pub PB7<Output<PushPull>>, // 8
     pub PB3<Output<PushPull>>, // 4
-    pub PB8<Output<PushPull>>, // 9
     pub PB4<Output<PushPull>>, // 5
+    pub PB5<Output<PushPull>>, // 6
+    pub PB6<Output<PushPull>>, // 7
+    pub PB7<Output<PushPull>>, // 8
+    pub PB8<Output<PushPull>>, // 9
     pub PB9<Output<PushPull>>, // 10
 );
 impl_heterogenous_array! {
@@ -150,14 +150,14 @@ const APP: () = {
             ),
             Rows(
                 gpioa.pa9.into_push_pull_output(&mut gpioa.crh),
-                gpiob.pb5.into_push_pull_output(&mut gpiob.crl),
                 gpioa.pa10.into_push_pull_output(&mut gpioa.crh),
-                gpiob.pb6.into_push_pull_output(&mut gpiob.crl),
                 pa15.into_push_pull_output(&mut gpioa.crh),
-                gpiob.pb7.into_push_pull_output(&mut gpiob.crl),
                 pb3.into_push_pull_output(&mut gpiob.crl),
-                gpiob.pb8.into_push_pull_output(&mut gpiob.crh),
                 pb4.into_push_pull_output(&mut gpiob.crl),
+                gpiob.pb5.into_push_pull_output(&mut gpiob.crl),
+                gpiob.pb6.into_push_pull_output(&mut gpiob.crl),
+                gpiob.pb7.into_push_pull_output(&mut gpiob.crl),
+                gpiob.pb8.into_push_pull_output(&mut gpiob.crh),
                 gpiob.pb9.into_push_pull_output(&mut gpiob.crh),
             ),
         );
