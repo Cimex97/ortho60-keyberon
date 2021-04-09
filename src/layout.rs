@@ -28,7 +28,7 @@ pub static LAYERS: keyberon::layout::Layers = &[
         &[k(Kb6),   k(Kb7),  k(Kb8),  k(Kb9),   k(Kb0),   k(T),    k(PgUp)    ],      // 6
         &[k(K),   k(H),  k(G),  k(F),   k(Q),   k(Z),    k(PgDown)    ],              // 7
         &[k(S),   k(N),  k(R),  k(T),   k(D),   NoOp,    l(MOD3LAYER)    ],           // 8
-        &[NoOp, k(B),   k(M),  k(Comma),  k(Dot),  k(J),    l(SHIFTLAYER)    ],       // 9
+        &[NoOp, k(B),   k(M),  k(Comma),  k(Dot),  k(J),    k(RShift)    ],       // 9
         &[k(RShift), k(Enter), l(MOD4LAYER),  NoOp, NoOp,  l(FNLAYER),    k(RCtrl) ], // 10
 
 
@@ -48,7 +48,7 @@ pub static LAYERS: keyberon::layout::Layers = &[
         &[Trans, Trans, Trans, Trans, Trans, Trans, Trans],                                                          // 1
         &[Trans, Trans, m(& [RAlt, Dot] ), m(& [LShift, Slash]), m(& [RAlt, Kb8]), m(& [RAlt, Kb9]),  k(Grave) ],    // 2
         &[Trans, NoOp, m(& [RAlt, Minus] ), m(& [LShift, Kb7]), m(& [RAlt, Kb7]), m(& [RAlt, Kb0]),  s!(RBracket) ], // 3
-        &[Trans, k(NonUsHash), s!(Kb4), m(& [RAlt, NonUsBslash]), m(& [RAlt, RBracket]), s!(Equal),  k(BSpace) ],    // 4
+        &[NoOp, k(NonUsHash), s!(Kb4), m(& [RAlt, NonUsBslash]), m(& [RAlt, RBracket]), s!(Equal),  k(BSpace) ],    // 4
         &[Trans, Trans, Trans, Trans, Trans, Trans, Trans],                                                          // 5
         &[Trans, Trans, Trans, Trans, Trans, Trans, Trans],                                                          // 6
         &[s!(Kb1),   k(NonUsBslash),  s!(NonUsBslash),  s!(Kb0),   s!(Kb6),   m(&[RAlt, Q]),    k(PgDown)    ],      // 7
@@ -61,8 +61,8 @@ pub static LAYERS: keyberon::layout::Layers = &[
         &[Trans, Trans, k(PgUp), k(BSpace), k(Up), k(Delete),  k(Delete) ],       // 2
         &[Trans, NoOp, k(Home), k(Left), k(Down), k(Right),  k(End) ],            // 3
         &[Trans, k(Escape), k(Tab), k(Insert), k(Enter),  k(Undo), Trans ],       // 4
-        &[Trans, Trans, Trans, Trans, Trans, Trans, Trans],                       // 5
-        &[Trans, Trans, Trans, Trans, Trans,  k(Kb0), Trans ],                    // 6
+        &[Trans, Trans, Trans, Trans, Trans,  k(Kb0), Trans ],                    // 5
+        &[Trans, Trans, Trans, Trans, Trans, Trans, Trans],                       // 6
         &[m(& [RAlt, Kb1]), k(Kb7), k(Kb8), k(Kb9), k(RBracket), Trans,  Trans ], // 7
         &[m(&[ RAlt, Minus]), k(Kb4), k(Kb5), k(Kb6), k(Comma), NoOp,  Trans],    // 8
         &[NoOp, s!(Dot), k(Kb1), k(Kb2), k(Kb3),  s!(Comma), Trans ],             // 9
