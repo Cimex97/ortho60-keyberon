@@ -71,6 +71,13 @@ impl_heterogenous_array! {
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 }
 
+pub struct ShiftLeds(
+    pub PB12<Output<PushPull>>,
+    pub PB13<Output<PushPull>>,
+    pub PB14<Output<PushPull>>,
+
+);
+
 #[app(device = stm32f1xx_hal::pac, peripherals = true)]
 const APP: () = {
     struct Resources {
@@ -80,6 +87,7 @@ const APP: () = {
         debouncer: Debouncer<PressedKeys<U10, U7>>,
         layout: Layout,
         timer: timer::CountDownTimer<pac::TIM3>,
+        shift_leds: ShiftLeds,
     }
 
     #[init]
@@ -114,6 +122,12 @@ const APP: () = {
         cortex_m::asm::delay(clocks.sysclk().0 / 100);
 
         let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
+        let mut shift_leds = ShiftLeds(
+            gpiob.pb12.into_push_pull_output(&mut gpiob.crh), // led clk (SRCLR)
+            gpiob.pb13.into_push_pull_output(&mut gpiob.crh), // led data (SER)
+            gpiob.pb14.into_push_pull_output(&mut gpiob.crh), // led nEn (OE)
+        );
+
         led.set_low().unwrap();
         let leds = Leds { caps_lock: led };
 
@@ -166,6 +180,7 @@ const APP: () = {
             usb_dev,
             usb_class,
             timer,
+            shift_leds,
             debouncer: Debouncer::new(PressedKeys::default(), PressedKeys::default(), 5),
             matrix: matrix.unwrap(),
             layout: Layout::new(layout::LAYERS),
@@ -195,6 +210,30 @@ const APP: () = {
         }
         send_report(c.resources.layout.tick(), &mut c.resources.usb_class);
     }
+
+    #[idle(resources = [shift_leds])]
+    fn idle(c: idle::Context) -> ! {
+        c.resources.shift_leds.1.set_high().unwrap();
+        c.resources.shift_leds.2.set_high().unwrap();
+
+        for x in 0..16 {
+            c.resources.shift_leds.0.set_high().unwrap();
+            cortex_m::asm::delay(10);
+            c.resources.shift_leds.0.set_low().unwrap();
+            cortex_m::asm::delay(10);
+        }
+        c.resources.shift_leds.0.set_high().unwrap();
+        cortex_m::asm::delay(10);
+        c.resources.shift_leds.0.set_low().unwrap();
+        cortex_m::asm::delay(10);
+        c.resources.shift_leds.2.set_low().unwrap();
+
+        loop {
+            cortex_m::asm::nop;
+        }
+
+    }
+
 };
 
 fn send_report(iter: impl Iterator<Item = KeyCode>, usb_class: &mut resources::usb_class<'_>) {
