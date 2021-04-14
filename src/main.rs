@@ -3,7 +3,7 @@
 
 use core::convert::Infallible;
 use embedded_hal::digital::v2::{InputPin, OutputPin};
-use generic_array::typenum::{U7, U10};
+use generic_array::typenum::{U8, U10};
 use keyberon::debounce::Debouncer;
 use keyberon::impl_heterogenous_array;
 use keyberon::key_code::{KbHidReport, KeyCode};
@@ -37,6 +37,7 @@ impl keyberon::keyboard::Leds for Leds {
 }
 
 pub struct Cols(
+    pub PB0<Input<PullUp>>,
     pub PA0<Input<PullUp>>,
     pub PA1<Input<PullUp>>,
     pub PA2<Input<PullUp>>,
@@ -48,8 +49,8 @@ pub struct Cols(
 impl_heterogenous_array! {
     Cols,
     dyn InputPin<Error = Infallible>,
-    U7,
-    [0, 1, 2, 3, 4, 5, 6]
+    U8,
+    [0, 1, 2, 3, 4, 5, 6, 7]
 }
 
 pub struct Rows(
@@ -84,7 +85,7 @@ const APP: () = {
         usb_dev: UsbDevice,
         usb_class: UsbClass,
         matrix: Matrix<Cols, Rows>,
-        debouncer: Debouncer<PressedKeys<U10, U7>>,
+        debouncer: Debouncer<PressedKeys<U10, U8>>,
         layout: Layout,
         timer: timer::CountDownTimer<pac::TIM3>,
         shift_leds: ShiftLeds,
@@ -154,6 +155,7 @@ const APP: () = {
 
         let matrix = Matrix::new(
             Cols(
+                gpiob.pb0.into_pull_up_input(&mut gpiob.crl),
                 gpioa.pa0.into_pull_up_input(&mut gpioa.crl),
                 gpioa.pa1.into_pull_up_input(&mut gpioa.crl),
                 gpioa.pa2.into_pull_up_input(&mut gpioa.crl),
