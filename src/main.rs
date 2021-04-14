@@ -54,9 +54,9 @@ impl_heterogenous_array! {
 }
 
 pub struct Rows(
-    pub PA9<Output<PushPull>>, // 1
-    pub PA10<Output<PushPull>>, // 2
-    pub PA15<Output<PushPull>>, // 3
+    pub PA8<Output<PushPull>>, // 1
+    pub PA9<Output<PushPull>>, // 2
+    pub PA10<Output<PushPull>>, // 3
     pub PB3<Output<PushPull>>, // 4
     pub PB4<Output<PushPull>>, // 5
     pub PB5<Output<PushPull>>, // 6
@@ -165,9 +165,9 @@ const APP: () = {
                 gpioa.pa6.into_pull_up_input(&mut gpioa.crl),
             ),
             Rows(
+                gpioa.pa8.into_push_pull_output(&mut gpioa.crh),
                 gpioa.pa9.into_push_pull_output(&mut gpioa.crh),
                 gpioa.pa10.into_push_pull_output(&mut gpioa.crh),
-                pa15.into_push_pull_output(&mut gpioa.crh),
                 pb3.into_push_pull_output(&mut gpiob.crl),
                 pb4.into_push_pull_output(&mut gpiob.crl),
                 gpiob.pb5.into_push_pull_output(&mut gpiob.crl),
